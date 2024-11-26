@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperMuzakBros</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='game.css')}}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='game.js')}}"></script>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+<div class="overlay" id="usernameOverlay">
+    <div class="usernameForm" id="usernameForm">
+        <label for="usernameInput">This is the story of...</label>
+        <input type="text" id="usernameInput" name="usernameInput">
+        <input type="button" onclick="onUsernameSubmit()" value="Submit"/>
+    </div>
+</div>
+</body>
+</html>
