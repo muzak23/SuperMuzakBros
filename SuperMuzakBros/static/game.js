@@ -92,6 +92,11 @@ class Game {
             this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
         });
 
+        socket.on('playerMessage', (data) => {
+            console.log(data);
+            this.enemies[data.username].showMessage(data.message);
+        });
+
         socket.on('playerDisconnect', (data) => {
             console.log('player disconnected: ' + data);
             delete this.enemies[data];
@@ -102,6 +107,17 @@ class Game {
         document.addEventListener('keydown', (e) => {
             if (e.key in this.keys) {
                 this.keys[e.key] = true;
+            } else if (e.key === 'Enter') {
+                if (document.getElementById('usernameOverlay').style.display !== 'none') {
+                    onUsernameSubmit();
+                } else if (document.getElementById('chatBox').style.display === 'none') {
+                    console.log('chatting2');
+                    document.getElementById('chatBoxOverlay').style.display = 'flex';
+                    document.getElementById('chatBox').style.display = 'block';
+                    document.getElementById('chatInput').focus();
+                } else {
+                    this.player.chat();
+                }
             }
         });
 
@@ -152,11 +168,17 @@ class Game {
             this.isFalling = true;
             this.color = 'red'; // default color if not selected
             this.game = game;
+            this.message = undefined;
+            this.messageTimeout = null;
         }
 
         draw() {
             this.game.ctx.fillStyle = this.color;
             this.game.ctx.fillRect(this.x, this.y, this.width, this.height);
+            if (this.message !== undefined) {
+                this.game.ctx.fillStyle = 'black';
+                this.game.ctx.fillText(this.message, this.x, this.y - 20);
+            }
         }
 
         update() {
@@ -194,7 +216,21 @@ class Game {
             // Keep Character within canvas bounds
             this.x = Math.max(0, Math.min(this.x, this.game.canvas.width - this.width));
         }
+
+        showMessage(message) {
+            console.log('message received');
+            this.message = message;
+
+            if (this.messageTimeout !== null) {
+                clearTimeout(this.messageTimeout);
+            }
+            this.messageTimeout = setTimeout(() => {
+                this.message = undefined;
+                this.messageTimeout = null
+            }, 5000);
+        }
     }
+
     Player = class extends this.Character {
         constructor(x, y, width, height, game, username) {
             super(x, y, width, height, game);
@@ -227,6 +263,24 @@ class Game {
         moveRight() {
             this.velocityX += this.game.ACCELERATION;
         }
+
+        chat() {
+            let message = document.getElementById('chatInput').value;
+            if (message.trim() !== '') {
+                socket.emit('playerMessage', {message: message}, (callback) => {
+                    if (callback === 'messageRateLimit') {
+                        console.log('messageRateLimit');
+                    } else {
+                        console.log('messageReceived');
+                        document.getElementById('chatBox').style.display = 'none';
+                        document.getElementById('chatInput').value = '';
+                        document.getElementById('chatBoxOverlay').style.display = 'none';
+                        this.showMessage(message);
+                    }
+                });
+            }
+
+        }
     }
 
     Platform = class {
@@ -252,10 +306,10 @@ class Game {
         }
 
         draw() {
-            this.game.ctx.fillStyle = 'red';
-            this.game.ctx.fillRect(this.x, this.y, this.width, this.height);
+            super.draw();
             this.game.ctx.fillStyle = 'black';
             this.game.ctx.fillText(this.username, this.x, this.y - 10);
+
         }
 
         updatePos(x, y) {

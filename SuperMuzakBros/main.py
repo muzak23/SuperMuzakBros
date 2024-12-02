@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, session
 from flask import Blueprint
 
@@ -7,6 +9,27 @@ from flask_socketio import emit
 # from game import *
 
 main = Blueprint('main', __name__)
+
+class Player:
+    def __init__(self, username, pos=(50, 200)):
+        self.username = username
+        self.pos = pos
+        self.chat_history = []
+
+    def add_message(self, message, timestamp):
+        self.chat_history.append((message, timestamp))
+
+    def get_last_message_time(self):
+        if self.chat_history:
+            return self.chat_history[-1][1]
+        return None
+
+    def isRateLimited(self):
+        last_message_time = self.get_last_message_time()
+        if last_message_time is not None:
+            return (datetime.now() - last_message_time).total_seconds() < 3
+        return False
+
 
 players = {}
 
@@ -19,9 +42,10 @@ def index():
 @socketio.on('connect')
 def connect_handler():
     print('someone is trying to connect')
-    print('sending them ' + str({'players': players}))
+    public_players = {k: {'username': v.username, 'pos': v.pos} for k, v in players.items()}
+    print('sending them ' + str({'players': public_players}))
     emit('connected', {
-        'players': players
+        'players': public_players
     })
 
 
@@ -37,7 +61,7 @@ def username_handler(username):
     # store username in session
     session['username'] = username
     print(f'VALID: user chose username {username}')
-    players[username] = (50, 200)
+    players[username] = Player(username)
     emit('newPlayer', username, broadcast=True, include_self=False)
     return 'validUsername'
 
@@ -49,8 +73,25 @@ def playerPos_handler(data):
         'username': session['username'],
         'pos': data
     }
-    players[session['username']] = data
+    players[session['username']].pos = data
     emit('playerPos', bc, broadcast=True, include_self=False)
+
+
+@socketio.on('playerMessage')
+def playerMessage_handler(data):
+    player = players[session['username']]
+    print(f"{player.username} says: {data}")
+    # don't let them send if sent in last 3 seconds
+    if player.isRateLimited():
+        print(f"{player.username} is rate limited")
+        return 'messageRateLimit'
+    player.add_message(data['message'], datetime.now())
+    bc = {
+        'username': player.username,
+        'message': data['message']
+    }
+    emit('playerMessage', bc, broadcast=True, include_self=False)
+    return 'messageReceived'
 
 
 @socketio.on('disconnect')
