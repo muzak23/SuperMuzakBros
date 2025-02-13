@@ -67,6 +67,8 @@ class Game {
         this.setupNetworkEventListeners();
         this.setupKeyEventListeners();
         console.log('game created, starting loop');
+        this.lastFrameTime = performance.now();
+        this.frameTime = 0;
         this.gameLoop();
     }
 
@@ -140,6 +142,13 @@ class Game {
     gameLoop() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        const currentFrameTime = performance.now();
+        this.frameTime = (currentFrameTime - this.lastFrameTime) / 17; // Convert to seconds
+        this.lastFrameTime = currentFrameTime;
+
+        console.log(this.frameTime)
+
+
         // if player exists
         if (this.player !== undefined) {
             if (this.keys.ArrowLeft) this.player.moveLeft();
@@ -185,11 +194,11 @@ class Game {
             this.isFalling = true; // Assume falling unless collision detected
 
             // Apply gravity
-            this.velocityY += this.game.GRAVITY;
+            this.velocityY += this.game.GRAVITY * this.game.frameTime;
 
             // Update position
-            this.x += this.velocityX;
-            this.y += this.velocityY;
+            this.x += this.velocityX * this.game.frameTime;
+            this.y += this.velocityY * this.game.frameTime;
 
             // Check for collisions with platforms
             for (const platform of this.game.platforms) {
@@ -207,7 +216,7 @@ class Game {
             this.velocityX *= this.game.FRICTION;
 
             // Prevent falling through the bottom of the canvas
-            if (this.y + this.height > this.game.canvas.height) {
+            if (this.isFalling && this.y + this.height > this.game.canvas.height) {
                 this.y = this.game.canvas.height - this.height;
                 this.velocityY = 0;
                 this.isFalling = false;
@@ -243,7 +252,7 @@ class Game {
             super.update();
             let currentPos = [Math.round(this.x), Math.round(this.y)];
             if (previousPos[0] !== currentPos[0] || previousPos[1] !== currentPos[1]) {
-                // debug see why they're equal
+                // debug
                 console.log('' + previousPos[0] + ' ' + previousPos[1] + ' and ' + currentPos[0] + ' ' + currentPos[1]);
                 socket.emit('playerPos', currentPos);
             }
