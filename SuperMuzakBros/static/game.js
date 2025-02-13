@@ -88,10 +88,12 @@ class Game {
             this.enemies[data] = new this.Enemy(data, 50, 200, 40, 60, this);
         });
 
-        socket.on('playerPos', (data) => {
+        socket.on('playerMovement', (data) => {
             console.log(data);
+            console.log('j')
             console.log(this.enemies);
             this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
+            this.enemies[data.username].updateVel(data.vel[0], data.vel[1]);
         });
 
         socket.on('playerMessage', (data) => {
@@ -160,6 +162,7 @@ class Game {
         }
         this.platforms.forEach(platform => platform.draw());
         for (const enemy in this.enemies) {
+            this.enemies[enemy].update();
             this.enemies[enemy].draw();
         }
 
@@ -254,7 +257,7 @@ class Game {
             if (previousPos[0] !== currentPos[0] || previousPos[1] !== currentPos[1]) {
                 // debug
                 console.log('' + previousPos[0] + ' ' + previousPos[1] + ' and ' + currentPos[0] + ' ' + currentPos[1]);
-                socket.emit('playerPos', currentPos);
+                socket.emit('playerMovement', {'pos': currentPos, 'vel': [this.velocityX, this.velocityY]});
             }
         }
 
@@ -321,9 +324,18 @@ class Game {
 
         }
 
+        update() {
+            super.update();
+        }
+
         updatePos(x, y) {
             this.x = x;
             this.y = y;
+        }
+
+        updateVel(x, y) {
+            this.velocityX = x;
+            this.velocityY = y;
         }
     }
 }
