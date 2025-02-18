@@ -89,8 +89,8 @@ class Game {
         });
 
         socket.on('playerPos', (data) => {
-            console.log(data);
-            console.log(this.enemies);
+            //console.log(data);
+            //console.log(this.enemies);
             this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
         });
 
@@ -132,10 +132,24 @@ class Game {
 
     checkCollision(player, platform) {
         return (
-            player.x < platform.x + platform.width &&
-            player.x + player.width > platform.x &&
-            player.y < platform.y + platform.height &&
-            player.y + player.height > platform.y
+            player.x < platform.x + platform.width &&   // player left edge is left of platform right edge
+            player.x + player.width > platform.x &&     // player right edge is right of platform left edge
+            player.y < platform.y + platform.height &&  // player top edge is above platform bottom edge
+            player.y + player.height > platform.y       // player bottom edge is below platform top edge
+        );
+    }
+
+    checkStandingOnPlatform(player, platform) {
+        return (
+            player.x < platform.x + platform.width &&   // player left edge is left of platform right edge
+            player.x + player.width >  platform.x &&     // player right edge is right of platform left edge
+            (
+                player.y + player.height === platform.y ||  // player bottom edge is ON platform top edge
+                (                                           // OR
+                    player.y + player.height <= platform.y &&   // player bottom edge is above platform top edge
+                    player.y + player.height + player.velocityY >= platform.y // clipping: player bottom edge next tick is below platform top edge
+                )
+            )
         );
     }
 
@@ -145,9 +159,6 @@ class Game {
         const currentFrameTime = performance.now();
         this.frameTime = (currentFrameTime - this.lastFrameTime) / 17; // Convert to seconds
         this.lastFrameTime = currentFrameTime;
-
-        console.log(this.frameTime)
-
 
         // if player exists
         if (this.player !== undefined) {
@@ -191,26 +202,26 @@ class Game {
         }
 
         update() {
-            this.isFalling = true; // Assume falling unless collision detected
+            // Check for collisions with platforms
+            let collided = false;
+            for (const platform of this.game.platforms) {
+                if (this.velocityY >= 0 && this.game.checkStandingOnPlatform(this, platform)) {
+                    // Land on top of the platform
+                    this.y = platform.y - this.height;
+                    this.velocityY = 0;
+                    collided = true;
+                }
+            }
+            this.isFalling = !collided;
 
-            // Apply gravity
-            this.velocityY += this.game.GRAVITY * this.game.frameTime;
+            if (this.isFalling) {
+                // Apply gravity
+                this.velocityY += this.game.GRAVITY * this.game.frameTime;
+            }
 
             // Update position
             this.x += this.velocityX * this.game.frameTime;
             this.y += this.velocityY * this.game.frameTime;
-
-            // Check for collisions with platforms
-            for (const platform of this.game.platforms) {
-                if (this.game.checkCollision(this, platform)) {
-                    if (this.velocityY > 0 && this.y + this.height - this.velocityY <= platform.y) {
-                        // Land on top of the platform
-                        this.y = platform.y - this.height;
-                        this.velocityY = 0;
-                        this.isFalling = false;
-                    }
-                }
-            }
 
             // Apply friction
             this.velocityX *= this.game.FRICTION;
@@ -253,7 +264,8 @@ class Game {
             let currentPos = [Math.round(this.x), Math.round(this.y)];
             if (previousPos[0] !== currentPos[0] || previousPos[1] !== currentPos[1]) {
                 // debug
-                console.log('' + previousPos[0] + ' ' + previousPos[1] + ' and ' + currentPos[0] + ' ' + currentPos[1]);
+                //console.log('' + previousPos[0] + ' ' + previousPos[1] + ' and ' + currentPos[0] + ' ' + currentPos[1]);
+                //console.log('' + this.velocityX + ' ' + this.velocityY + ' and ' + this.isFalling)
                 socket.emit('playerPos', currentPos);
             }
         }
