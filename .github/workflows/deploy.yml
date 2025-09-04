@@ -1,0 +1,45 @@
+name: Deploy (Production)
+
+on:
+    push:
+        branches:
+        - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@c397d0cf88522ea1fe7a57115d03df0340c2c00a
+
+  SonarCloud:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@ba3875ecf642b2129de2b589510c81a8b53dbf4e
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
+        with:
+          args:
+            -Dsonar.projectKey=muzak23_SuperMuzakBros
+            -Dsonar.organization=muzak23
+          projectBaseDir: .
+
+  DeployProduction:
+    needs: [lint, SonarCloud]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy (Production)
+        uses: appleboy/ssh-action@3ca8a7c5359ac6ad91aa47f1946ece1c3b025004
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          script: |
+            cd SuperMuzakBros
+            git pull origin main
+            docker build -t super:latest .
+            docker stop super || true
+            docker run --name super -p 5001:5001 -d --rm super:latest 
