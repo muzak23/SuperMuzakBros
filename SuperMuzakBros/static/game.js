@@ -81,14 +81,13 @@ class Game {
         game.player = new game.Player(50, 50, 40, 60, game, username);
     }
 
-
     setupNetworkEventListeners() {
         socket.on('newPlayer', (data) => {
             console.log(data);
             this.enemies[data] = new this.Enemy(data, 50, 200, 40, 60, this);
         });
 
-        socket.on('playerPos', (data) => {
+        socket.on('playerMovement', (data) => {
             //console.log(data);
             //console.log(this.enemies);
             this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
@@ -360,11 +359,3 @@ function gameSetup(data) {
         game.enemies[enemy] = new game.Enemy(enemy, data['players'][enemy][0], data['players'][enemy][1], 40, 60, game);
     }
 }
-
-
-
-
-
-
-
-
