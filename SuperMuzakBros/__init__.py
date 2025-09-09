@@ -31,7 +31,7 @@ def create_app():
         def static_file(filename):
             h = STATIC_HASHES.get(filename, '0')
             return url_for('static', filename=filename, v=h)
-        return dict(static_file=static_file)
+        return {'static_file': static_file}
 
     with app.app_context():
         # blueprint for main game page/APIs

@@ -23,7 +23,7 @@ class Player:
             return self.chat_history[-1][1]
         return None
 
-    def isRateLimited(self):
+    def is_rate_limited(self):
         last_message_time = self.get_last_message_time()
         if last_message_time is not None:
             return (datetime.now() - last_message_time).total_seconds() < 3
@@ -66,7 +66,7 @@ def username_handler(username):
 
 
 @socketio.on('playerMovement')
-def playerMovement_handler(data):
+def player_movement_handler(data):
     # print(f"{session['username']} moved to ({data['pos'][0]}, {data['pos'][1]})")
     bc = {
         'username': session['username'],
@@ -78,7 +78,7 @@ def playerMovement_handler(data):
 
 
 @socketio.on('playerMessage')
-def playerMessage_handler(data):
+def player_message_handler(data):
     player = players[session['username']]
     print(f"{player.username} says: {data}")
     # don't let them send if sent in last 3 seconds

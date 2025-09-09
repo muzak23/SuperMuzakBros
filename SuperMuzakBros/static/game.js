@@ -2,7 +2,7 @@ function onDOMContentLoaded(evt) {
     attemptConnect();
 }
 
-const socket = io();
+let socket = io(), game;
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
 

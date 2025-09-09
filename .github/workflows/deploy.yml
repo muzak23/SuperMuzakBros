@@ -19,7 +19,7 @@ jobs:
       - name: Analyze with SonarCloud
         uses: SonarSource/sonarcloud-github-action@ba3875ecf642b2129de2b589510c81a8b53dbf4e
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args:
             -Dsonar.projectKey=muzak23_SuperMuzakBros
