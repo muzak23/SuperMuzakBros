@@ -68,7 +68,7 @@ def username_handler(username):
 
 @socketio.on('playerMovement')
 def playerMovement_handler(data):
-    print(f"{session['username']} moved to ({data['pos'][0]}, {data['pos'][1]})")
+    # print(f"{session['username']} moved to ({data['pos'][0]}, {data['pos'][1]})")
     bc = {
         'username': session['username'],
         'pos': data['pos'],

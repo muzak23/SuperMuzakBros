@@ -334,10 +334,6 @@ class Game {
 
         }
 
-        update() {
-            super.update();
-        }
-
         updatePos(x, y) {
             this.x = x;
             this.y = y;
