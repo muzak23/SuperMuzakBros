@@ -17,13 +17,11 @@ function attemptConnect() {
 
 socket.on('connected', (data) => {
     console.log('connected with data: ' + data);
-    debug_enemies = data['players'];
     gameSetup(data);
 });
 
 // Username input
 function onUsernameSubmit(evt) {
-    // evt.preventDefault();
     let username = document.getElementById('usernameInput').value;
     console.log("emitting username: " + username);
     socket.emit('username', {username: username}, function (callback) {
@@ -88,8 +86,6 @@ class Game {
         });
 
         socket.on('playerMovement', (data) => {
-            //console.log(data);
-            //console.log(this.enemies);
             this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
             this.enemies[data.username].updateVel(data.vel[0], data.vel[1]);
         });
@@ -264,9 +260,6 @@ class Game {
             super.update();
             let currentPos = [Math.round(this.x), Math.round(this.y)];
             if (previousPos[0] !== currentPos[0] || previousPos[1] !== currentPos[1]) {
-                // debug
-                //console.log('' + previousPos[0] + ' ' + previousPos[1] + ' and ' + currentPos[0] + ' ' + currentPos[1]);
-                //console.log('' + this.velocityX + ' ' + this.velocityY + ' and ' + this.isFalling)
                 socket.emit('playerMovement', {'pos': currentPos, 'vel': [this.velocityX, this.velocityY]});
             }
         }

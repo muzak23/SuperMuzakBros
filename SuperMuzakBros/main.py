@@ -6,7 +6,6 @@ from flask import Blueprint
 from . import socketio
 from flask_socketio import emit
 
-# from game import *
 
 main = Blueprint('main', __name__)
 
