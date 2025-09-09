@@ -6,7 +6,6 @@ from flask import Blueprint
 from . import socketio
 from flask_socketio import emit
 
-# from game import *
 
 main = Blueprint('main', __name__)
 
@@ -66,15 +65,16 @@ def username_handler(username):
     return 'validUsername'
 
 
-@socketio.on('playerPos')
-def playerPos_handler(data):
-    print(f"{session['username']} moved to ({data[0]}, {data[1]})")
+@socketio.on('playerMovement')
+def playerMovement_handler(data):
+    # print(f"{session['username']} moved to ({data['pos'][0]}, {data['pos'][1]})")
     bc = {
         'username': session['username'],
-        'pos': data
+        'pos': data['pos'],
+        'vel': data['vel']
     }
-    players[session['username']].pos = data
-    emit('playerPos', bc, broadcast=True, include_self=False)
+    players[session['username']].pos = data['pos']
+    emit('playerMovement', bc, broadcast=True, include_self=False)
 
 
 @socketio.on('playerMessage')

@@ -17,13 +17,11 @@ function attemptConnect() {
 
 socket.on('connected', (data) => {
     console.log('connected with data: ' + data);
-    debug_enemies = data['players'];
     gameSetup(data);
 });
 
 // Username input
 function onUsernameSubmit(evt) {
-    // evt.preventDefault();
     let username = document.getElementById('usernameInput').value;
     console.log("emitting username: " + username);
     socket.emit('username', {username: username}, function (callback) {
@@ -81,17 +79,15 @@ class Game {
         game.player = new game.Player(50, 50, 40, 60, game, username);
     }
 
-
     setupNetworkEventListeners() {
         socket.on('newPlayer', (data) => {
             console.log(data);
             this.enemies[data] = new this.Enemy(data, 50, 200, 40, 60, this);
         });
 
-        socket.on('playerPos', (data) => {
-            //console.log(data);
-            //console.log(this.enemies);
+        socket.on('playerMovement', (data) => {
             this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
+            this.enemies[data.username].updateVel(data.vel[0], data.vel[1]);
         });
 
         socket.on('playerMessage', (data) => {
@@ -171,6 +167,7 @@ class Game {
         }
         this.platforms.forEach(platform => platform.draw());
         for (const enemy in this.enemies) {
+            this.enemies[enemy].update();
             this.enemies[enemy].draw();
         }
 
@@ -263,10 +260,7 @@ class Game {
             super.update();
             let currentPos = [Math.round(this.x), Math.round(this.y)];
             if (previousPos[0] !== currentPos[0] || previousPos[1] !== currentPos[1]) {
-                // debug
-                //console.log('' + previousPos[0] + ' ' + previousPos[1] + ' and ' + currentPos[0] + ' ' + currentPos[1]);
-                //console.log('' + this.velocityX + ' ' + this.velocityY + ' and ' + this.isFalling)
-                socket.emit('playerPos', currentPos);
+                socket.emit('playerMovement', {'pos': currentPos, 'vel': [this.velocityX, this.velocityY]});
             }
         }
 
@@ -337,6 +331,11 @@ class Game {
             this.x = x;
             this.y = y;
         }
+
+        updateVel(x, y) {
+            this.velocityX = x;
+            this.velocityY = y;
+        }
     }
 }
 
@@ -349,11 +348,3 @@ function gameSetup(data) {
         game.enemies[enemy] = new game.Enemy(enemy, data['players'][enemy][0], data['players'][enemy][1], 40, 60, game);
     }
 }
-
-
-
-
-
-
-
-
