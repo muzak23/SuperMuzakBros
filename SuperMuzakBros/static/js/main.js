@@ -51,3 +51,16 @@ export function connected(data) {
     console.log('connected with data: ' + data);
     gameSetup(data);
 }
+
+export function handleNewPlayer(data) {
+    game.newPlayer(data);
+}
+export function handlePlayerMovement(data) {
+    game.playerMovement(data);
+}
+export function handlePlayerMessage(data) {
+    game.playerMessage(data);
+}
+export function handlePlayerDisconnect(data) {
+    game.playerDisconnect(data);
+}

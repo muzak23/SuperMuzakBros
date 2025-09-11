@@ -1,7 +1,6 @@
 import { Player } from './entities/Player.js';
 import { Enemy } from './entities/Enemy.js';
 import { Platform } from './entities/Platform.js';
-import { socket } from './network.js';
 
 export class Game {
     constructor() {
@@ -25,7 +24,6 @@ export class Game {
         ];
         this.enemies = {};
 
-        this.setupNetworkEventListeners();
         this.setupKeyEventListeners();
         console.log('game created, starting loop');
         this.lastFrameTime = performance.now();
@@ -42,23 +40,21 @@ export class Game {
         this.player = new Player(50, 50, 40, 60, this, username);
     }
 
-    setupNetworkEventListeners() {
-        socket.on('newPlayer', (data) => {
-            this.enemies[data] = new Enemy(data, 50, 200, 40, 60, this);
-        });
+    newPlayer(data) {
+        this.enemies[data] = new Enemy(data, 50, 200, 40, 60, this);
+    }
 
-        socket.on('playerMovement', (data) => {
-            this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
-            this.enemies[data.username].updateVel(data.vel[0], data.vel[1]);
-        });
+    playerMovement(data) {
+        this.enemies[data.username].updatePos(data.pos[0], data.pos[1]);
+        this.enemies[data.username].updateVel(data.vel[0], data.vel[1]);
+    }
 
-        socket.on('playerMessage', (data) => {
-            this.enemies[data.username].showMessage(data.message);
-        });
+    playerMessage(data) {
+        this.enemies[data.username].showMessage(data.message);
+    }
 
-        socket.on('playerDisconnect', (data) => {
-            delete this.enemies[data];
-        });
+    playerDisconnect(data) {
+        delete this.enemies[data];
     }
 
     setupKeyEventListeners() {

@@ -1,4 +1,4 @@
-import { connected } from './main.js';
+import { connected, handleNewPlayer, handlePlayerMovement, handlePlayerMessage, handlePlayerDisconnect } from './main.js';
 
 // Socket.IO connection and event handling
 export const socket = io();
@@ -25,4 +25,20 @@ export function sendMessage(message, callback) {
 
 socket.on('connected', (data) => {
     connected(data);
+});
+
+socket.on('newPlayer', (data) => {
+    handleNewPlayer(data);
+});
+
+socket.on('playerMovement', (data) => {
+    handlePlayerMovement(data)
+});
+
+socket.on('playerMessage', (data) => {
+    handlePlayerMessage(data);
+});
+
+socket.on('playerDisconnect', (data) => {
+    handlePlayerDisconnect(data);
 });
