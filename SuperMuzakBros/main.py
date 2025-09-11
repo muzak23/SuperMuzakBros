@@ -41,7 +41,7 @@ def index():
 @socketio.on('connect')
 def connect_handler():
     print('someone is trying to connect')
-    public_players = {k: {'username': v.username, 'pos': v.pos} for k, v in players.items()}
+    public_players = {k: {'pos': v.pos} for k, v in players.items()}
     print('sending them ' + str({'players': public_players}))
     emit('connected', {
         'players': public_players

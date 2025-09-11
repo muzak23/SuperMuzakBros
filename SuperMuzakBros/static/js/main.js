@@ -36,10 +36,12 @@ function onUsernameSubmit(evt) {
 // Sets up the game with the initial data from the server right on page load, before player username selection/spawning
 function gameSetup(data) {
     game = new Game();
+    console.log(data['players']);
     // foreach enemy make enemy
     // format of data['players'] is {username: (x, y)}
     for (const enemy in data['players']) {
-        game.enemies[enemy] = new Enemy(enemy, data['players'][enemy][0], data['players'][enemy][1], 40, 60, game);
+        const pos = data['players'][enemy]['pos'];
+        game.enemies[enemy] = new Enemy(enemy, pos[0], pos[1], 40, 60, game);
     }
 }
 
