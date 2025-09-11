@@ -8,7 +8,7 @@
             integrity="sha512-8ExARjWWkIllMlNzVg7JKq9RKWPlJABQUNq6YvAjE/HobctjH/NA+bSiDMDvouBVjp4Wwnf1VP1OEv7Zgjtuxw=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="{{ static_file('game.css')}}">
-    <script type="text/javascript" src="{{ static_file('game.js')}}"></script>
+    <script type="module" src="/static/js/main.js"></script>
 </head>
 <body>
 <canvas id="gameCanvas" width="800" height="400"></canvas>
@@ -16,7 +16,7 @@
     <div class="usernameForm" id="usernameForm">
         <label for="usernameInput">This is the story of...</label>
         <input type="text" id="usernameInput" name="usernameInput" autofocus>
-        <input type="button" onclick="onUsernameSubmit()" value="Submit"/>
+        <input type="button" id="usernameSubmitBtn" value="Submit"/>
     </div>
 </div>
 <div class="extraOverlay" id="chatBoxOverlay" >

@@ -18,10 +18,27 @@ def create_app():
 
     def build_static_map():
         cache = {}
-        for name in ('game.js', 'game.css'):
+        # Update to include all the new modular JavaScript files
+        js_files = [
+            'main.js',
+            'game.js',
+            'network.js',
+            'entities/Character.js',
+            'entities/Player.js',
+            'entities/Enemy.js',
+            'entities/Platform.js'
+        ]
+        css_files = [
+            'game.css'
+        ]
+
+        for name in js_files + css_files:
             path = os.path.join(app.static_folder, name)
-            with open(path, 'rb') as f:
-                cache[name] = hashlib.md5(f.read()).hexdigest()[:8]
+            if os.path.exists(path):
+                with open(path, 'rb') as f:
+                    cache[name] = hashlib.md5(f.read()).hexdigest()[:8]
+            else:
+                cache[name] = '0'
         return cache
 
     STATIC_HASHES = build_static_map()
@@ -46,4 +63,3 @@ def create_app():
         socketio.init_app(app)
 
         return app
-
